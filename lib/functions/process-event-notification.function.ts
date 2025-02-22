@@ -1,5 +1,6 @@
 import { metricScope, StorageResolution, Unit } from "aws-embedded-metrics";
 import { type S3Handler } from "aws-lambda";
+import { checkNotNull } from "../check-not-null";
 
 /**
  * {
@@ -46,7 +47,7 @@ import { type S3Handler } from "aws-lambda";
 export const handler: S3Handler = metricScope((metrics) => (event) => {
   console.log("Processing S3Event:", JSON.stringify(event, null, 2));
 
-  const record = event.Records[0]!!;
+  const record = checkNotNull(event.Records[0]);
 
   const objectKey = decodeURIComponent(record.s3.object.key);
 
@@ -55,10 +56,5 @@ export const handler: S3Handler = metricScope((metrics) => (event) => {
 
   const timeDifference = eventTime.getTime() - objectCreateTime.getTime();
 
-  metrics.putMetric(
-    "lifecycle-latency",
-    timeDifference,
-    Unit.Milliseconds,
-    StorageResolution.Standard
-  );
+  metrics.putMetric("lifecycle-latency", timeDifference, Unit.Milliseconds, StorageResolution.Standard);
 });

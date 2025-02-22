@@ -1,7 +1,4 @@
-import {
-  CloudWatchClient,
-  GetMetricWidgetImageCommand,
-} from "@aws-sdk/client-cloudwatch";
+import { CloudWatchClient, GetMetricWidgetImageCommand } from "@aws-sdk/client-cloudwatch";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { EventBridgeEvent } from "aws-lambda";
 import { z } from "zod";
@@ -14,9 +11,7 @@ const s3Client = new S3Client({
   region: process.env.AWS_REGION,
 });
 
-export const handler = async (
-  event: EventBridgeEvent<any, any>
-): Promise<void> => {
+export const handler = async (event: EventBridgeEvent<string, string>): Promise<void> => {
   console.log("Processing EventBrigdeEvent:", JSON.stringify(event, null, 2));
 
   const environmentVariables = z
@@ -88,9 +83,7 @@ export const handler = async (
 
   console.log({ getLatencyMetricWidgetImageInput });
 
-  const getLatencyMetricWidgetImageOutput = await cloudwatchClient.send(
-    new GetMetricWidgetImageCommand(getLatencyMetricWidgetImageInput)
-  );
+  const getLatencyMetricWidgetImageOutput = await cloudwatchClient.send(new GetMetricWidgetImageCommand(getLatencyMetricWidgetImageInput));
 
   await s3Client.send(
     new PutObjectCommand({
@@ -99,6 +92,6 @@ export const handler = async (
       Body: getLatencyMetricWidgetImageOutput.MetricWidgetImage,
       ContentEncoding: "base64",
       ContentType: "image/png",
-    })
+    }),
   );
 };
